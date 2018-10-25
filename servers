@@ -1,0 +1,140 @@
+#!/bin/bash
+# A script to check and kill servers
+# Luke Clark M. Andrada
+# Solutions Engineer Intern
+
+########## TODO
+# Generalize with functions
+
+########## VARIABLES
+# Color
+blue="\033[;1m\033[1;34m"
+red="\033[;1m\033[1;31m"
+rev="\033[0;0m"
+
+# Servers
+servers=(
+"adsia-server"
+"alldb-server"
+"ashi-server"
+"automatedtesting-server"
+"awb-server"
+"ezy-server"
+"gitlabci-server"
+"herstal-server"
+"iot-server"
+"iotv10-server"
+"jlfp-server"
+"newproj-server"
+"odoo-server"
+"pandayan-server"
+"pgmc-server"
+"pgmctestdb-server"
+"ridgeback-server"
+"valdez-server"
+"zoup-server"
+)
+
+########## ALGORITHM
+while true
+do
+    if [[ `whoami` != root ]]
+    then
+        echo "Are you root?"
+        break
+    fi
+
+    active=()
+    exited=()
+    ghost=()
+
+    for server in ${servers[*]}
+    do
+        instance=$(ps -ef | grep "$server" | echo "`wc -l` - 1" | bc)
+        sudo service "$server" status &> /dev/null
+        if [[ $? -eq 0 ]]
+        then
+            if [[ $instance -eq 0 ]]
+            then
+                exited+="$server "
+            else
+                active+="$server "
+            fi
+        else
+            if [[ $instance -gt 1 ]]
+            then
+                ghost+="$server "
+            fi
+        fi
+    done
+
+    if [[ ${#active[*]} -ne 0 ]]
+    then
+        echo -e $blue'Active'$rev
+        for server in ${active[*]}
+        do
+            instance=$(ps -ef | grep "$server" | echo "`wc -l` - 1" | bc)
+            echo "$server with" $instance "instance"
+        done
+        echo ""
+    fi
+
+    if [[ ${#exited[*]} -ne 0 ]]
+    then
+        echo -e $blue'Active but exited'$rev
+        for server in ${exited[*]}
+        do
+            instance=$(ps -ef | grep "$server" | echo "`wc -l` - 1" | bc)
+            echo "$server with" $instance "instance"
+        done
+        echo ""
+    fi
+
+    if [[ ${#ghost[*]} -ne 0 ]]
+    then
+        echo -e $blue'Inactive but alive'$rev
+        for server in ${ghost[*]}
+        do
+            instance=$(ps -ef | grep "$server" | echo "`wc -l` - 1" | bc)
+            echo "$server with" $instance "instance"
+        done
+        echo ""
+    fi
+
+    while true
+    do
+        echo "Enter the server to kill. Enter nothing to exit."
+        echo -ne $red
+        read target
+        echo -ne $rev
+
+        if [[ -z $target ]]
+        then
+            break 3
+        fi
+
+        for server in ${server[*]}
+        do
+            if [[ "$server" = "$target" ]]
+            then
+                sudo service "$server" stop &> /dev/null
+
+                # List server processes
+                processes=`ps -ef | grep "$server" | tr -s " " | cut -f2 -d" "`
+
+                # Iterate server processes
+                for process in $processes
+                do
+                    # Kill server process
+                    sudo kill $process &> /dev/null
+                done
+                echo "$server is dead"
+                sleep 2
+                break 2
+            fi
+        done
+        echo ""
+    done
+done
+
+echo -e $blue"Exit"$rev
