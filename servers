@@ -61,7 +61,7 @@ do
                 active+="$server "
             fi
         else
-            if [[ $instance -gt 1 ]]
+            if [[ $instance -gt 0 ]]
             then
                 ghost+="$server "
             fi
