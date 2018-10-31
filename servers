@@ -14,30 +14,16 @@ rev="\033[0;0m"
 
 # Servers
 servers=(
-"adsia-server"
-"alldb-server"
-"ashi-server"
-"automatedtesting-server"
-"awb-server"
-"ezy-server"
-"gitlabci-server"
-"herstal-server"
-"iot-server"
-"iotv10-server"
-"jlfp-server"
-"newproj-server"
 "odoo-server"
-"pandayan-server"
-"pgmc-server"
-"pgmctestdb-server"
-"ridgeback-server"
-"valdez-server"
-"zoup-server"
+"php-server"
+"gitlabci-server"
 )
 
 ########## ALGORITHM
 while true
 do
+    clear
+
     if [[ `whoami` != root ]]
     then
         echo "Are you root?"
@@ -113,7 +99,7 @@ do
             break 3
         fi
 
-        for server in ${server[*]}
+        for server in ${servers[*]}
         do
             if [[ "$server" = "$target" ]]
             then
